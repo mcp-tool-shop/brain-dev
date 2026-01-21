@@ -5,14 +5,29 @@ build-backend = "hatchling.build"
 [project]
 name = "dev-brain"
 version = "1.0.0"
-description = "Intelligent developer insights MCP server - analyzes coverage, suggests tests, and provides UX insights"
+description = "MCP server for AI-powered code analysis — test generation, security audits, coverage analysis, and refactoring suggestions for Claude"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [
     { name = "AI Workstation" }
 ]
-keywords = ["mcp", "developer", "testing", "coverage", "ai", "agents"]
+keywords = [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "claude",
+    "code-analysis",
+    "test-generation",
+    "pytest",
+    "security-scanning",
+    "coverage-analysis",
+    "refactoring",
+    "ast",
+    "developer-tools",
+    "ai-agents",
+    "llm-tools",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",

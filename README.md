@@ -1,42 +1,52 @@
-# Dev Brain MCP Server
+# 🧠 Dev Brain — AI-Powered Code Intelligence for Claude
 
-[![Tests](https://github.com/YOUR_USERNAME/dev-brain/actions/workflows/test.yml/badge.svg)](https://github.com/YOUR_USERNAME/dev-brain/actions/workflows/test.yml)
-[![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen)](https://github.com/YOUR_USERNAME/dev-brain)
+[![PyPI version](https://badge.fury.io/py/dev-brain.svg)](https://pypi.org/project/dev-brain/)
+[![Tests](https://github.com/mikeyfrilot/dev-brain/actions/workflows/test.yml/badge.svg)](https://github.com/mikeyfrilot/dev-brain/actions/workflows/test.yml)
+[![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen)](https://github.com/mikeyfrilot/dev-brain)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![MCP](https://img.shields.io/badge/MCP-Compatible-purple.svg)](https://modelcontextprotocol.io/)
 
-**Intelligence layer for developer insights** - coverage analysis, test generation, refactoring suggestions, security audits, and UX insights via MCP.
+> **Transform Claude into a code analysis powerhouse.** Dev Brain is an MCP server that gives AI assistants the ability to analyze test coverage, generate pytest tests from AST, detect security vulnerabilities, and suggest refactoring improvements — all through natural conversation.
 
-## Features
+<p align="center">
+  <a href="#-why-dev-brain">Why Dev Brain?</a> •
+  <a href="#-quick-start">Quick Start</a> •
+  <a href="#-tools">Tools</a> •
+  <a href="#-security-scanning">Security</a> •
+  <a href="#-examples">Examples</a>
+</p>
 
-- **9 Analysis Tools** - Coverage gaps, behavior analysis, test generation, refactoring, UX insights, security audits, and more
-- **AST-Based Test Generation** - Automatically generate pytest tests with mocks that actually compile
-- **Security Vulnerability Detection** - OWASP-style scanning for SQL injection, command injection, hardcoded secrets
-- **Documentation Analysis** - Find missing docstrings and suggest templates
-- **MCP Native** - Integrates seamlessly with Claude and other MCP clients
+---
 
-## Installation
+## 🎯 Why Dev Brain?
+
+**The Problem:** AI coding assistants can write code, but they can't *deeply analyze* your codebase. They don't know what's untested, what's vulnerable, or what needs refactoring.
+
+**The Solution:** Dev Brain gives Claude (and other MCP clients) **9 specialized analysis tools** that turn it into a senior developer who can:
+
+| Capability | What It Does |
+|------------|--------------|
+| 🧪 **Test Generation** | Generate complete pytest files with fixtures, mocks, and edge cases — code that actually compiles |
+| 🔒 **Security Audits** | Detect SQL injection, command injection, hardcoded secrets, and 6+ vulnerability patterns |
+| 📊 **Coverage Analysis** | Find untested code paths, missing edge cases, and coverage gaps |
+| 🔄 **Refactoring Suggestions** | Identify complexity hotspots, naming issues, and code duplication |
+| 📝 **Documentation Analysis** | Find missing docstrings and generate documentation templates |
+| 🎨 **UX Insights** | Analyze user-facing code for dropoff points and error patterns |
+
+---
+
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
 pip install dev-brain
 ```
 
-Or for development:
+### Add to Claude Desktop
 
-```bash
-git clone https://github.com/YOUR_USERNAME/dev-brain.git
-cd dev-brain
-pip install -e ".[dev]"
-```
-
-## Quick Start
-
-```bash
-# Run the MCP server
-dev-brain
-```
-
-Add to your Claude Desktop config (`claude_desktop_config.json`):
+Add this to your `claude_desktop_config.json`:
 
 ```json
 {
@@ -48,38 +58,66 @@ Add to your Claude Desktop config (`claude_desktop_config.json`):
 }
 ```
 
-## Tools
+### Start Using It
+
+Just ask Claude naturally:
+
+- *"Analyze my authentication module for security vulnerabilities"*
+- *"Generate pytest tests for the UserService class"*
+- *"What test coverage gaps exist in my API handlers?"*
+- *"Suggest refactoring for files with high complexity"*
+
+---
+
+## 🛠️ Tools
 
 ### Analysis Tools
 
 | Tool | Description |
 |------|-------------|
-| `coverage_analyze` | Compare observed patterns to test coverage, find gaps |
-| `behavior_missing` | Find user behaviors not handled in code |
-| `refactor_suggest` | Suggest refactoring based on complexity, duplication, naming |
-| `ux_insights` | Extract UX insights from behavior patterns (dropoff, errors) |
+| `coverage_analyze` | Compare code patterns against test coverage, identify untested paths |
+| `behavior_missing` | Find user behaviors and edge cases not handled in code |
+| `refactor_suggest` | Analyze complexity, duplication, and naming issues |
+| `ux_insights` | Extract UX patterns — dropoff points, error states, friction areas |
 
 ### Generation Tools
 
 | Tool | Description |
 |------|-------------|
-| `tests_generate` | Generate test suggestions for coverage gaps |
-| `smart_tests_generate` | AST-based pytest generation with proper mocks and fixtures |
+| `tests_generate` | Create test suggestions based on coverage gaps |
+| `smart_tests_generate` | **AST-based pytest generation** — produces complete test files with proper fixtures, mocks, and assertions that actually compile |
 | `docs_generate` | Generate documentation templates for undocumented code |
 
 ### Security Tools
 
 | Tool | Description |
 |------|-------------|
-| `security_audit` | Scan for vulnerabilities (SQL injection, command injection, secrets, etc.) |
+| `security_audit` | OWASP-style vulnerability scanning with CWE mapping |
 
 ### Utility Tools
 
 | Tool | Description |
 |------|-------------|
-| `brain_stats` | Get server statistics and configuration |
+| `brain_stats` | Server statistics, configuration, and health status |
 
-## Example Usage
+---
+
+## 🔒 Security Scanning
+
+Dev Brain detects critical security vulnerabilities mapped to industry standards:
+
+| Severity | Vulnerability | CWE | Example |
+|----------|---------------|-----|---------|
+| 🔴 **Critical** | SQL Injection | CWE-89 | `f"SELECT * FROM users WHERE id = {user_id}"` |
+| 🔴 **Critical** | Command Injection | CWE-78 | `os.system(f"ping {host}")` |
+| 🔴 **Critical** | Unsafe Deserialization | CWE-502 | `pickle.loads(user_data)` |
+| 🟠 **High** | Hardcoded Secrets | CWE-798 | `api_key = "sk-1234..."` |
+| 🟠 **High** | Path Traversal | CWE-22 | `open(f"/data/{filename}")` |
+| 🟡 **Medium** | Insecure Cryptography | CWE-327 | `hashlib.md5(password)` |
+
+---
+
+## 📖 Examples
 
 ### Security Audit
 
@@ -91,7 +129,7 @@ result = await client.call_tool("security_audit", {
             "name": "execute_query",
             "file_path": "db.py",
             "line": 10,
-            "source_code": "cursor.execute(f\"SELECT * FROM users WHERE id = {user_id}\")"
+            "source_code": 'cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")'
         }
     ],
     "severity_threshold": "medium"
@@ -99,50 +137,63 @@ result = await client.call_tool("security_audit", {
 # Returns: SQL injection vulnerability detected (CWE-89)
 ```
 
-### Smart Test Generation
+### AST-Based Test Generation
 
 ```python
 result = await client.call_tool("smart_tests_generate", {
     "file_path": "/path/to/your/module.py"
 })
-# Returns complete pytest file with fixtures and mocks
+# Returns: Complete pytest file with fixtures, mocks, and edge case coverage
 ```
 
-## Architecture
+### Natural Language (via Claude)
+
+```
+You: "Check my payment processing module for security issues"
+
+Claude: I'll run a security audit on your payment module...
+
+Found 2 vulnerabilities:
+🔴 Critical: SQL injection in process_payment() at line 45
+🟠 High: Hardcoded API key detected at line 12
+
+Recommendations:
+1. Use parameterized queries instead of f-strings
+2. Move API key to environment variables
+```
+
+---
+
+## 🏗️ Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      DEV BRAIN MCP SERVER                    │
+│                    DEV BRAIN MCP SERVER                     │
 ├─────────────────────────────────────────────────────────────┤
-│  Analyzers                                                   │
-│  ├─ CoverageAnalyzer    (test gaps)                         │
-│  ├─ BehaviorAnalyzer    (unhandled flows)                   │
-│  ├─ RefactorAnalyzer    (complexity, naming)                │
-│  ├─ UXAnalyzer          (dropoff, errors)                   │
-│  ├─ DocsAnalyzer        (missing docs)                      │
-│  └─ SecurityAnalyzer    (vulnerabilities)                   │
+│  Analyzers                                                  │
+│  ├─ CoverageAnalyzer    → Test gap detection                │
+│  ├─ BehaviorAnalyzer    → Unhandled flow discovery          │
+│  ├─ RefactorAnalyzer    → Complexity & naming analysis      │
+│  ├─ UXAnalyzer          → Dropoff & error pattern detection │
+│  ├─ DocsAnalyzer        → Documentation gap finder          │
+│  └─ SecurityAnalyzer    → OWASP vulnerability scanner       │
 ├─────────────────────────────────────────────────────────────┤
-│  Generators                                                  │
-│  ├─ TestGenerator       (skeleton tests)                    │
-│  └─ SmartTestGenerator  (AST-based pytest)                  │
+│  Generators                                                 │
+│  ├─ TestGenerator       → Coverage-based test suggestions   │
+│  └─ SmartTestGenerator  → AST-powered pytest generation     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Security Patterns Detected
+---
 
-| Category | Severity | CWE |
-|----------|----------|-----|
-| SQL Injection | Critical | CWE-89 |
-| Command Injection | Critical | CWE-78 |
-| Insecure Deserialization | Critical | CWE-502 |
-| Hardcoded Secrets | High | CWE-798 |
-| Path Traversal | High | CWE-22 |
-| Insecure Crypto | Medium | CWE-327 |
-
-## Development
+## 🔧 Development
 
 ```bash
-# Install dev dependencies
+# Clone the repository
+git clone https://github.com/mikeyfrilot/dev-brain.git
+cd dev-brain
+
+# Install in development mode
 pip install -e ".[dev]"
 
 # Run tests
@@ -151,15 +202,44 @@ pytest tests/ -v
 # Run with coverage
 pytest tests/ --cov=dev_brain --cov-report=html
 
-# Type checking (optional)
+# Type checking
 mypy dev_brain
 ```
 
-## Related Projects
+---
 
-- [Tool Compass](https://github.com/mikeyfrilot/tool-compass) - Semantic MCP tool discovery
-- [Integradio](https://github.com/mikeyfrilot/integradio) - Semantic Gradio components
+## 🌐 Related Projects
 
-## License
+- **[Model Context Protocol](https://modelcontextprotocol.io/)** — The open standard that makes this possible
+- **[MCP Servers](https://github.com/modelcontextprotocol/servers)** — Official reference implementations
+- **[Awesome MCP Servers](https://github.com/punkpeye/awesome-mcp-servers)** — Community server directory
 
-MIT License - see [LICENSE](LICENSE) for details.
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Here's how:
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+See [SECURITY.md](SECURITY.md) for security policy and vulnerability reporting.
+
+---
+
+## 📄 License
+
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+<p align="center">
+  <strong>If Dev Brain helps you write better code, consider giving it a ⭐</strong>
+</p>
+
+<p align="center">
+  <sub>Built for the MCP ecosystem • Made with 🧠 by developers, for developers</sub>
+</p>
