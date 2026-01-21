@@ -508,22 +508,35 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
 
     async def handle_smart_tests_generate(args: dict) -> list[TextContent]:
         """Handle smart_tests_generate tool."""
-        import os
+        from pathlib import Path
 
         file_path = args.get("file_path", "")
 
-        # Validate file exists
-        if not os.path.isfile(file_path):
+        # Validate file_path is provided and is a string
+        if not file_path or not isinstance(file_path, str):
             return [TextContent(
                 type="text",
                 text=json.dumps({
-                    "error": f"File not found: {file_path}",
+                    "error": "file_path is required and must be a string",
+                    "success": False,
+                })
+            )]
+
+        # Normalize and resolve the path to prevent path traversal display issues
+        try:
+            resolved_path = Path(file_path).resolve()
+            file_name = resolved_path.name  # Safe: only the filename for error messages
+        except (ValueError, OSError):
+            return [TextContent(
+                type="text",
+                text=json.dumps({
+                    "error": "Invalid file path provided",
                     "success": False,
                 })
             )]
 
         # Validate it's a Python file
-        if not file_path.endswith(".py"):
+        if not file_name.endswith(".py"):
             return [TextContent(
                 type="text",
                 text=json.dumps({
@@ -532,26 +545,48 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
                 })
             )]
 
+        # Validate file exists
+        if not resolved_path.is_file():
+            return [TextContent(
+                type="text",
+                text=json.dumps({
+                    "error": f"File not found: {file_name}",
+                    "success": False,
+                })
+            )]
+
         try:
             # Generate tests using the smart test generator
-            test_code = generate_tests_for_file(file_path)
+            test_code = generate_tests_for_file(str(resolved_path))
 
             return [TextContent(
                 type="text",
                 text=json.dumps({
                     "success": True,
-                    "file_path": file_path,
+                    "file_name": file_name,
                     "test_code": test_code,
                     "lines": len(test_code.split("\n")),
                 })
             )]
-        except Exception as e:
+        except SyntaxError as e:
+            # Handle Python syntax errors in the source file
             return [TextContent(
                 type="text",
                 text=json.dumps({
-                    "error": str(e),
+                    "error": f"Syntax error in source file: {e.msg}",
                     "success": False,
-                    "file_path": file_path,
+                    "file_name": file_name,
+                })
+            )]
+        except Exception as e:
+            # Sanitize error message - don't expose internal paths or stack traces
+            error_type = type(e).__name__
+            return [TextContent(
+                type="text",
+                text=json.dumps({
+                    "error": f"Failed to generate tests: {error_type}",
+                    "success": False,
+                    "file_name": file_name,
                 })
             )]
 
