@@ -2,38 +2,51 @@
 
 **Last Updated:** January 28, 2026  
 **Total Projects:** 27+ (counting all subdirectories)  
-**On PyPI:** 20 ✅  
+**On PyPI:** 18 ✅  
+**Pending Publisher Approval:** 2 ⏳  
 **Not Python (npm/Node.js):** 5  
-**Failed/Unknown Reason:** ~2-3  
+**Total Publishable Python:** 25 (18 published + 2 pending + ~5 others)
 
 ---
 
 ## 📊 Summary by Status
 
-### ✅ Successfully on PyPI (20 packages)
+### ✅ Successfully Published to PyPI (18 packages)
 
-These packages have been successfully published to PyPI and are ready for installation via `pip install`.
+**Recently Released (8-9 hours ago - Jan 28, 2026):**
+1. **brain-dev** - MCP server for AI-powered code analysis
+2. **nexus-router-adapter-http** - HTTP adapter for nexus-router
+3. **nexus-router-adapter-stdout** - Debug adapter to stdout
+4. **flexiflow** - Async component engine with events & state machines
+5. **a11y-ci** - CI gate for a11y-lint scorecards
+6. **a11y-lint** - Accessibility linter for CLI output
+7. **payroll-engine** - US Payroll SaaS Engine with PSP
+8. **nexus-router** - Event-sourced MCP router with provenance
+9. **tool-scan** - Security scanner for MCP tools
+10. **mcp-stress-test** - Stress testing framework for MCP
 
-1. **brain-dev** - AI-powered code intelligence MCP server
-2. **code-covered** - Code coverage analysis and improvement
-3. **tool-scan** - Security scanning for MCP tools
-4. **mcp-stress-test** - Performance and load testing for MCP servers
-5. **comfy-headless** - Headless ComfyUI wrapper for image generation
-6. **audiobooker** - Audio book generation from text
-7. **file-compass** - File discovery and navigation tools
-8. **integradio** - Integration discovery and orchestration
-9. **flexiflow** - Flexible workflow automation
-10. **tool-compass** - MCP tool discovery and registry
-11. **payroll-engine** - Payroll processing automation
-12. **pathway** - Process automation and workflow management
-13. **mcpt** - MCP tool CLI and configuration
-14. **nexus-router** - Core routing engine
-15. **nexus-router-adapter-stdout** - stdout adapter for routing
-16. **ally-demo-python** - Accessibility demo application
-17. **aspire-ai** - AI integration framework
-18. **headless-wheel-builder** - Headless Python wheel builder
-19. **a11y-assist**, **a11y-ci**, **a11y-lint** - Accessibility tools
-20. **voice-soundboard** ✅ (just fixed - Python 3.14 compatible)
+**Recently Released (Jan 18-24, 2026):**
+11. **headless-wheel-builder** - Universal Python wheel builder (Jan 24)
+12. **voice-soundboard** - AI-powered voice soundboard via MCP (Jan 23)
+13. **aspire-ai** - Adversarial Student-Professor Reasoning Engine (Jan 22)
+14. **integradio** - Vector-embedded Gradio components (Jan 20)
+15. **file-compass** - Semantic file search with HNSW indexing (Jan 19)
+16. **backpropagate** - Production-ready headless LLM fine-tuning (Jan 19)
+17. **tool-compass** - Semantic MCP tool discovery gateway (Jan 18)
+18. **comfy-headless** - Headless ComfyUI client with AI prompt intelligence (Jan 18)
+
+---
+
+### ⏳ Pending Publisher Approval (2 packages)
+
+These have workflows configured and are waiting for PyPI to approve the trusted publisher:
+
+| Package | Status | Last Release | Details |
+|---------|--------|--------------|---------|
+| **code-covered** | Pending | Recent | Code coverage analysis |
+| **claude-collaborate** | Pending | Recent | Reference implementation |
+
+**Action:** Approve on PyPI settings → Pending publishers to finalize publication
 
 ---
 
@@ -53,61 +66,26 @@ These cannot be published to PyPI as they are JavaScript/Node.js projects. They 
 
 ---
 
-## ❌ Failed to Publish / Unknown Reason
+## ❌ Missing from PyPI / Not Yet Published
 
-Based on workspace scan, these projects have issues:
+Based on PyPI account verification, these projects are not in the 18 published packages:
 
-### 1. **nexus-router-adapter-http** ❌ NO PUBLISH WORKFLOW
-**Status:** ❌ Missing PyPI workflow  
-**Location:** `core/nexus-router-adapter-http/`  
-**Description:** HTTP adapter for nexus-router (reference implementation)  
-**Version:** 0.1.0  
-**Python:** >=3.10  
-**Dependencies:** nexus-router>=0.8.0, httpx>=0.25.0  
-**Issue:** Only has `adapter-ci.yml` for testing, NO `publish.yml` workflow  
+### Projects to Investigate (7 candidates)
 
-**Fix:**
-- Add `.github/workflows/publish.yml` with PyPI publishing action
-- Configure release-triggered publishing
-- See examples: `tool-scan`, `mcp-stress-test`, `voice-soundboard`
+| Project | Location | Status | Notes |
+|---------|----------|--------|-------|
+| **audiobooker** | `media/audiobooker/` | Not on PyPI | Has pyproject.toml, verify status |
+| **mcpt** | `automation/mcpt/` | Not on PyPI | Has pyproject.toml, verify status |
+| **pathway** | `automation/pathway/` | Not on PyPI | Has pyproject.toml, verify status |
+| **ally-demo-python** | `reference/ally-demo-python/` | Not on PyPI | Reference implementation? |
+| **a11y-assist** | `accessibility/a11y-assist/` | Not on PyPI | Has pyproject.toml, check status |
+| **context-window-manager** | `ai/context-window-manager/` | Not on PyPI | Has publish workflow, verify |
+| **claude-collaborate** | `reference/claude-collaborate/` | ⏳ Pending | Awaiting publisher approval |
 
----
+### ✅ Confirmed Fixed
 
-### 2. **backpropagate** ✅ HAS WORKFLOW (Verify Published)
-**Status:** ✅ Publish workflow exists  
-**Location:** `ai/backpropagate/`  
-**Description:** Production-ready headless LLM fine-tuning with LoRA/QLoRA  
-**Version:** 0.1.0  
-**Python:** >=3.10  
-**Issue:** None detected - likely published successfully  
-
-**Action:** Verify on PyPI - if NOT published, check workflow logs
-
----
-
-### 3. **context-window-manager** ✅ HAS WORKFLOW (Verify Published)
-**Status:** ✅ Publish workflow exists  
-**Location:** `ai/context-window-manager/`  
-**Description:** MCP server for LLM context restoration via KV cache persistence  
-**Version:** 0.6.2  
-**Python:** >=3.11  
-**Issue:** None detected - likely published successfully  
-
-**Action:** Verify on PyPI - if NOT published, check workflow logs
-
----
-
-### 4. **headless-wheel-builder** ✅ HAS WORKFLOW (Verify Published)
-**Status:** ✅ Publish workflow exists  
-**Location:** `reference/headless-wheel-builder/`  
-**Description:** Universal headless Python wheel builder with GitHub operations  
-**Details:** 
-- Has comprehensive publish workflow
-- README claims PyPI badge
-- 226 tests, 62%+ coverage
-- Production ready designation
-
-**Action:** Verify on PyPI - if NOT published, check workflow logs
+- **nexus-router-adapter-http** ✅ NOW ON PyPI (was not on list but got published 8 hours ago)
+- **voice-soundboard** ✅ FIXED (Python 3.14 compatible)
 **Details:**
 - Has `pyproject.toml` indicating Python project
 - Complex project with build/publish features
