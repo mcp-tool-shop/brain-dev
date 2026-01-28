@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/brain-dev.svg)](https://pypi.org/project/brain-dev/)
 [![Tests](https://github.com/mcp-tool-shop/brain-dev/actions/workflows/test.yml/badge.svg)](https://github.com/mcp-tool-shop/brain-dev/actions/workflows/test.yml)
-[![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen)](https://github.com/mcp-tool-shop/brain-dev)
+[![codecov](https://codecov.io/gh/mcp-tool-shop/brain-dev/branch/master/graph/badge.svg)](https://codecov.io/gh/mcp-tool-shop/brain-dev)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-purple.svg)](https://modelcontextprotocol.io/)
