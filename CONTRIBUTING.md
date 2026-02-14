@@ -4,6 +4,18 @@ Dev Brain is an MCP server that provides AI-powered code analysis tools. Contrib
 
 ## Local Development
 
+### With uv (recommended — matches CI)
+
+```bash
+git clone https://github.com/mcp-tool-shop-org/brain-dev.git
+cd brain-dev
+uv sync --frozen --extra dev   # deterministic install from uv.lock
+uv run pytest                  # run tests
+uv run brain-dev               # run the MCP server
+```
+
+### With pip
+
 ```bash
 git clone https://github.com/mcp-tool-shop-org/brain-dev.git
 cd brain-dev
@@ -14,6 +26,10 @@ brain-dev            # run the MCP server
 ```
 
 Requires **Python 3.11+** (CI tests 3.11, 3.12, 3.13, 3.14).
+
+> **Note:** CI uses `uv sync --frozen` so the lock file (`uv.lock`) is the
+> source of truth for dependency versions.  After changing `pyproject.toml`
+> dependencies, run `uv lock` to regenerate it.
 
 ## How to Contribute
 
@@ -28,8 +44,8 @@ Requires **Python 3.11+** (CI tests 3.11, 3.12, 3.13, 3.14).
 2. **Make your changes** — follow existing code style, use type hints, add tests
 3. **Test your changes**
    ```bash
-   pytest                                                       # run all tests
-   pytest tests/ -v --cov=brain_dev --cov-report=term-missing   # with coverage
+   uv run pytest                                                       # run all tests
+   uv run pytest tests/ -v --cov=brain_dev --cov-report=term-missing   # with coverage
    ```
 4. **Commit** with clear, descriptive messages; reference issue numbers when applicable
 5. **Submit a pull request** using the PR template
@@ -53,6 +69,7 @@ brain-dev/
 │   ├── test_integration.py     # End-to-end workflow tests
 │   └── test_coverage_gaps.py   # Edge-case coverage tests
 ├── pyproject.toml              # Build config, deps, entry point
+├── uv.lock                    # Locked dependency versions (committed)
 └── CHANGELOG.md
 ```
 
