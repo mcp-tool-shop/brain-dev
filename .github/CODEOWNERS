@@ -1,0 +1,17 @@
+# Code Owners for brain-dev
+# These owners are automatically requested for review on PRs.
+
+# Default owner for everything
+*                       @mcp-tool-shop
+
+# Core package
+brain_dev/**            @mcp-tool-shop
+
+# Tests
+tests/**                @mcp-tool-shop
+
+# CI and repo governance
+.github/**              @mcp-tool-shop
+
+# Build / packaging
+pyproject.toml          @mcp-tool-shop

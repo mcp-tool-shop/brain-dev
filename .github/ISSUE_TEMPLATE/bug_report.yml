@@ -1,0 +1,56 @@
+name: Bug Report
+description: Report a bug in Dev Brain
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please fill in the details below so we can reproduce and fix it.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug description
+      description: A clear and concise description of the bug.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce this behaviour?
+      placeholder: |
+        1. Call tool `...` with arguments `...`
+        2. Observe output
+        3. Expected vs. actual
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What should happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Paste versions or fill in below.
+      value: |
+        - Python version:
+        - brain-dev version:
+        - MCP client (Claude Desktop / Cursor / other):
+        - OS:
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / error output
+      description: Paste any relevant logs (wrap in a code block).
+      render: text
