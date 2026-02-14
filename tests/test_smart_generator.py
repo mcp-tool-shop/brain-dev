@@ -640,3 +640,32 @@ def get_name(key: str) -> Optional[str]:
 
         assert "isinstance(result, str)" in result
         assert "result is None or result is not None" not in result
+
+
+class TestTempPathGeneration:
+    """Regression: generated mock values must use OS-appropriate temp paths."""
+
+    def test_path_mock_uses_tempfile(self, tmp_path):
+        """Path-typed params should use tempfile.gettempdir(), not hardcoded /tmp."""
+        test_file = tmp_path / "patharg.py"
+        test_file.write_text(
+            "from pathlib import Path\n\n"
+            "def process(config_path: Path) -> None:\n"
+            "    pass\n"
+        )
+
+        result = generate_tests_for_file(str(test_file))
+
+        # The generated test must reference tempfile.gettempdir(), not /tmp
+        assert "tempfile.gettempdir()" in result
+        assert '"/tmp' not in result
+
+    def test_generated_imports_include_tempfile(self, tmp_path):
+        """Generated test code must import tempfile and Path."""
+        test_file = tmp_path / "simple.py"
+        test_file.write_text("def hello() -> str:\n    return 'hi'\n")
+
+        result = generate_tests_for_file(str(test_file))
+
+        assert "import tempfile" in result
+        assert "from pathlib import Path" in result

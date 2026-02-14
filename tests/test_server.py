@@ -866,3 +866,48 @@ class TestInputValidation:
         result = await call_tool(server, "brain_stats", {})
         data = json.loads(result[0].text)
         assert "tools_available" in data
+
+
+# =============================================================================
+# Service Singleton Factory Tests
+# =============================================================================
+
+class TestServiceSingletonFactory:
+    """Regression: _get_service must return the same instance on repeated calls."""
+
+    def test_singleton_returns_same_instance(self):
+        """Calling _get_service twice for the same name returns the exact same object."""
+        server = create_server()
+        first = server._get_service("coverage_analyzer")
+        second = server._get_service("coverage_analyzer")
+        assert first is second
+
+    def test_singleton_different_services_are_distinct(self):
+        """Different service names return different objects."""
+        server = create_server()
+        coverage = server._get_service("coverage_analyzer")
+        behavior = server._get_service("behavior_analyzer")
+        assert coverage is not behavior
+
+    def test_all_registered_services_constructible(self):
+        """Every key in the constructor map produces a valid instance."""
+        from brain_dev.analyzer import (
+            CoverageAnalyzer, BehaviorAnalyzer, TestGenerator,
+            RefactorAnalyzer, UXAnalyzer, DocsAnalyzer, SecurityAnalyzer,
+        )
+        expected_types = {
+            "coverage_analyzer": CoverageAnalyzer,
+            "behavior_analyzer": BehaviorAnalyzer,
+            "test_generator": TestGenerator,
+            "refactor_analyzer": RefactorAnalyzer,
+            "ux_analyzer": UXAnalyzer,
+            "docs_analyzer": DocsAnalyzer,
+            "security_analyzer": SecurityAnalyzer,
+        }
+        server = create_server()
+        for name, expected_type in expected_types.items():
+            instance = server._get_service(name)
+            assert isinstance(instance, expected_type), (
+                f"_get_service({name!r}) returned {type(instance).__name__}, "
+                f"expected {expected_type.__name__}"
+            )

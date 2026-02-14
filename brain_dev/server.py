@@ -318,56 +318,24 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
     config = config or DevBrainConfig()
     server = Server(config.server_name)
 
-    # Initialize analyzers (lazy singletons)
-    _coverage_analyzer: Optional[CoverageAnalyzer] = None
-    _behavior_analyzer: Optional[BehaviorAnalyzer] = None
-    _test_generator: Optional[TestGenerator] = None
-    _refactor_analyzer: Optional[RefactorAnalyzer] = None
-    _ux_analyzer: Optional[UXAnalyzer] = None
-    _docs_analyzer: Optional[DocsAnalyzer] = None
-    _security_analyzer: Optional[SecurityAnalyzer] = None
+    # Lazy-singleton registry: one cache + constructor map replaces 7 nonlocal blocks
+    _service_cache: dict[str, Any] = {}
+    _service_constructors: dict[str, Any] = {
+        "coverage_analyzer": lambda: CoverageAnalyzer(min_support=config.min_gap_support),
+        "behavior_analyzer": BehaviorAnalyzer,
+        "test_generator": TestGenerator,
+        "refactor_analyzer": RefactorAnalyzer,
+        "ux_analyzer": UXAnalyzer,
+        "docs_analyzer": DocsAnalyzer,
+        "security_analyzer": SecurityAnalyzer,
+    }
 
-    def get_coverage_analyzer() -> CoverageAnalyzer:
-        nonlocal _coverage_analyzer
-        if _coverage_analyzer is None:
-            _coverage_analyzer = CoverageAnalyzer(min_support=config.min_gap_support)
-        return _coverage_analyzer
-
-    def get_behavior_analyzer() -> BehaviorAnalyzer:
-        nonlocal _behavior_analyzer
-        if _behavior_analyzer is None:
-            _behavior_analyzer = BehaviorAnalyzer()
-        return _behavior_analyzer
-
-    def get_test_generator() -> TestGenerator:
-        nonlocal _test_generator
-        if _test_generator is None:
-            _test_generator = TestGenerator()
-        return _test_generator
-
-    def get_refactor_analyzer() -> RefactorAnalyzer:
-        nonlocal _refactor_analyzer
-        if _refactor_analyzer is None:
-            _refactor_analyzer = RefactorAnalyzer()
-        return _refactor_analyzer
-
-    def get_ux_analyzer() -> UXAnalyzer:
-        nonlocal _ux_analyzer
-        if _ux_analyzer is None:
-            _ux_analyzer = UXAnalyzer()
-        return _ux_analyzer
-
-    def get_docs_analyzer() -> DocsAnalyzer:
-        nonlocal _docs_analyzer
-        if _docs_analyzer is None:
-            _docs_analyzer = DocsAnalyzer()
-        return _docs_analyzer
-
-    def get_security_analyzer() -> SecurityAnalyzer:
-        nonlocal _security_analyzer
-        if _security_analyzer is None:
-            _security_analyzer = SecurityAnalyzer()
-        return _security_analyzer
+    def _get_service(name: str) -> Any:
+        """Return the cached singleton for *name*, creating it on first access."""
+        if name not in _service_cache:
+            constructor = _service_constructors[name]
+            _service_cache[name] = constructor()
+        return _service_cache[name]
 
     # =========================================================================
     # Tool Handlers
@@ -380,7 +348,7 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
         except ToolInputError as e:
             return _validation_error(str(e))
 
-        analyzer = get_coverage_analyzer()
+        analyzer = _get_service("coverage_analyzer")
 
         test_patterns = args.get("test_patterns", [])
         min_support = args.get("min_support", config.min_gap_support)
@@ -414,7 +382,7 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
         except ToolInputError as e:
             return _validation_error(str(e))
 
-        analyzer = get_behavior_analyzer()
+        analyzer = _get_service("behavior_analyzer")
 
         code_symbols = args.get("code_symbols", [])
         min_count = args.get("min_count", 5)
@@ -436,7 +404,7 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
         except ToolInputError as e:
             return _validation_error(str(e))
 
-        generator = get_test_generator()
+        generator = _get_service("test_generator")
 
         framework = args.get("framework", config.default_test_framework)
         style = args.get("style", config.test_style)
@@ -471,7 +439,7 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
         except ToolInputError as e:
             return _validation_error(str(e))
 
-        analyzer = get_refactor_analyzer()
+        analyzer = _get_service("refactor_analyzer")
 
         patterns = args.get("patterns", [])
         analysis_type = args.get("analysis_type", "all")
@@ -502,7 +470,7 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
         except ToolInputError as e:
             return _validation_error(str(e))
 
-        analyzer = get_ux_analyzer()
+        analyzer = _get_service("ux_analyzer")
 
         flow_type = args.get("flow_type", "general")
         metric = args.get("metric", "all")
@@ -644,7 +612,7 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
         except ToolInputError as e:
             return _validation_error(str(e))
 
-        analyzer = get_docs_analyzer()
+        analyzer = _get_service("docs_analyzer")
 
         doc_style = args.get("doc_style", "google")
 
@@ -666,7 +634,7 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
         except ToolInputError as e:
             return _validation_error(str(e))
 
-        analyzer = get_security_analyzer()
+        analyzer = _get_service("security_analyzer")
 
         severity_threshold = args.get("severity_threshold", "low")
 
@@ -757,6 +725,9 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
             content=json.dumps({"error": "Unknown resource"}),
             mime_type="application/json",
         )]
+
+    # Expose service factory for testing (not part of MCP protocol)
+    server._get_service = _get_service  # type: ignore[attr-defined]
 
     return server
 
