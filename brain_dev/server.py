@@ -1,12 +1,16 @@
 """
 MCP Server implementation for Dev Brain.
 
-Provides 5 tools for developer insights:
+Provides tools for developer insights:
 - coverage_analyze: Analyze test coverage gaps
 - behavior_missing: Find unhandled user behaviors
 - tests_generate: Generate test suggestions
 - refactor_suggest: Suggest refactoring opportunities
 - ux_insights: Extract UX insights from behavior
+- brain_stats: Server statistics
+- smart_tests_generate: AST-based pytest generation
+- docs_generate: Documentation suggestions
+- security_audit: Security vulnerability scanning
 """
 
 import asyncio
@@ -36,6 +40,221 @@ from .analyzer import (
 from .smart_test_generator import generate_tests_for_file
 
 
+# =========================================================================
+# Tool Schema Definitions (pure data — no runtime deps)
+# =========================================================================
+
+TOOL_DEFINITIONS: list[Tool] = [
+    Tool(
+        name="coverage_analyze",
+        description="Analyze test coverage gaps by comparing observed user flows to test coverage",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "patterns": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "sequence": {"type": "array", "items": {"type": "string"}},
+                            "support": {"type": "number"},
+                            "occurrence_count": {"type": "integer"},
+                        },
+                    },
+                    "description": "Observed patterns (from context_patterns)"
+                },
+                "test_patterns": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                    },
+                    "description": "Patterns covered by existing tests"
+                },
+                "min_support": {
+                    "type": "number",
+                    "default": 0.05,
+                    "description": "Minimum support threshold for gaps"
+                },
+            },
+            "required": ["patterns"],
+        },
+    ),
+    Tool(
+        name="behavior_missing",
+        description="Find user behaviors not captured in code or tests",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "patterns": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "Observed behavior patterns"
+                },
+                "code_symbols": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "Code symbols (from context_search_code)"
+                },
+                "min_count": {
+                    "type": "integer",
+                    "default": 5,
+                    "description": "Minimum occurrence count to consider"
+                },
+            },
+            "required": ["patterns"],
+        },
+    ),
+    Tool(
+        name="tests_generate",
+        description="Generate test suggestions for coverage gaps",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "gap": {
+                    "type": "object",
+                    "properties": {
+                        "pattern": {"type": "array", "items": {"type": "string"}},
+                        "support": {"type": "number"},
+                        "description": {"type": "string"},
+                    },
+                    "description": "Coverage gap to generate test for"
+                },
+                "framework": {
+                    "type": "string",
+                    "enum": ["pytest", "jest", "go"],
+                    "default": "pytest",
+                    "description": "Test framework"
+                },
+                "style": {
+                    "type": "string",
+                    "enum": ["unit", "integration", "e2e"],
+                    "default": "unit",
+                    "description": "Test style"
+                },
+            },
+            "required": ["gap"],
+        },
+    ),
+    Tool(
+        name="refactor_suggest",
+        description="Suggest refactoring based on code and usage patterns",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "symbols": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "Code symbols to analyze"
+                },
+                "patterns": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "Usage patterns (optional)"
+                },
+                "analysis_type": {
+                    "type": "string",
+                    "enum": ["complexity", "duplication", "naming", "all"],
+                    "default": "all",
+                    "description": "Type of analysis"
+                },
+            },
+            "required": ["symbols"],
+        },
+    ),
+    Tool(
+        name="ux_insights",
+        description="Extract UX insights from user behavior patterns",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "patterns": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "Behavior patterns to analyze"
+                },
+                "flow_type": {
+                    "type": "string",
+                    "default": "general",
+                    "description": "Type of flow (search, checkout, onboarding)"
+                },
+                "metric": {
+                    "type": "string",
+                    "enum": ["dropoff", "error_rate", "all"],
+                    "default": "all",
+                    "description": "Metric to analyze"
+                },
+            },
+            "required": ["patterns"],
+        },
+    ),
+    Tool(
+        name="brain_stats",
+        description="Get Dev Brain server statistics",
+        inputSchema={
+            "type": "object",
+            "properties": {},
+        },
+    ),
+    Tool(
+        name="smart_tests_generate",
+        description="Generate complete pytest test file for a Python source file using AST analysis. Creates tests with proper mocks, fixtures, and assertions.",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "type": "string",
+                    "description": "Absolute path to the Python source file to generate tests for"
+                },
+            },
+            "required": ["file_path"],
+        },
+    ),
+    Tool(
+        name="docs_generate",
+        description="Generate documentation suggestions for code symbols with missing or incomplete docstrings",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "symbols": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "Code symbols to analyze for documentation"
+                },
+                "doc_style": {
+                    "type": "string",
+                    "enum": ["google", "numpy", "sphinx"],
+                    "default": "google",
+                    "description": "Documentation style to use"
+                },
+            },
+            "required": ["symbols"],
+        },
+    ),
+    Tool(
+        name="security_audit",
+        description="Analyze code for security vulnerabilities (SQL injection, command injection, hardcoded secrets, etc.)",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "symbols": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "Code symbols with source_code to analyze"
+                },
+                "severity_threshold": {
+                    "type": "string",
+                    "enum": ["low", "medium", "high", "critical"],
+                    "default": "low",
+                    "description": "Minimum severity level to report"
+                },
+            },
+            "required": ["symbols"],
+        },
+    ),
+]
+
+
 def create_server(config: Optional[DevBrainConfig] = None) -> Server:
     """
     Create and configure the Dev Brain MCP server.
@@ -49,12 +268,14 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
     config = config or DevBrainConfig()
     server = Server(config.server_name)
 
-    # Initialize analyzers
+    # Initialize analyzers (lazy singletons)
     _coverage_analyzer: Optional[CoverageAnalyzer] = None
     _behavior_analyzer: Optional[BehaviorAnalyzer] = None
     _test_generator: Optional[TestGenerator] = None
     _refactor_analyzer: Optional[RefactorAnalyzer] = None
     _ux_analyzer: Optional[UXAnalyzer] = None
+    _docs_analyzer: Optional[DocsAnalyzer] = None
+    _security_analyzer: Optional[SecurityAnalyzer] = None
 
     def get_coverage_analyzer() -> CoverageAnalyzer:
         nonlocal _coverage_analyzer
@@ -86,9 +307,6 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
             _ux_analyzer = UXAnalyzer()
         return _ux_analyzer
 
-    _docs_analyzer: Optional[DocsAnalyzer] = None
-    _security_analyzer: Optional[SecurityAnalyzer] = None
-
     def get_docs_analyzer() -> DocsAnalyzer:
         nonlocal _docs_analyzer
         if _docs_analyzer is None:
@@ -102,259 +320,8 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
         return _security_analyzer
 
     # =========================================================================
-    # Tool Definitions
+    # Tool Handlers
     # =========================================================================
-
-    @server.list_tools()
-    async def list_tools() -> list[Tool]:
-        """List available tools."""
-        return [
-            Tool(
-                name="coverage_analyze",
-                description="Analyze test coverage gaps by comparing observed user flows to test coverage",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "patterns": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "sequence": {"type": "array", "items": {"type": "string"}},
-                                    "support": {"type": "number"},
-                                    "occurrence_count": {"type": "integer"},
-                                },
-                            },
-                            "description": "Observed patterns (from context_patterns)"
-                        },
-                        "test_patterns": {
-                            "type": "array",
-                            "items": {
-                                "type": "array",
-                                "items": {"type": "string"}
-                            },
-                            "description": "Patterns covered by existing tests"
-                        },
-                        "min_support": {
-                            "type": "number",
-                            "default": 0.05,
-                            "description": "Minimum support threshold for gaps"
-                        },
-                    },
-                    "required": ["patterns"],
-                },
-            ),
-            Tool(
-                name="behavior_missing",
-                description="Find user behaviors not captured in code or tests",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "patterns": {
-                            "type": "array",
-                            "items": {"type": "object"},
-                            "description": "Observed behavior patterns"
-                        },
-                        "code_symbols": {
-                            "type": "array",
-                            "items": {"type": "object"},
-                            "description": "Code symbols (from context_search_code)"
-                        },
-                        "min_count": {
-                            "type": "integer",
-                            "default": 5,
-                            "description": "Minimum occurrence count to consider"
-                        },
-                    },
-                    "required": ["patterns"],
-                },
-            ),
-            Tool(
-                name="tests_generate",
-                description="Generate test suggestions for coverage gaps",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "gap": {
-                            "type": "object",
-                            "properties": {
-                                "pattern": {"type": "array", "items": {"type": "string"}},
-                                "support": {"type": "number"},
-                                "description": {"type": "string"},
-                            },
-                            "description": "Coverage gap to generate test for"
-                        },
-                        "framework": {
-                            "type": "string",
-                            "enum": ["pytest", "jest", "go"],
-                            "default": "pytest",
-                            "description": "Test framework"
-                        },
-                        "style": {
-                            "type": "string",
-                            "enum": ["unit", "integration", "e2e"],
-                            "default": "unit",
-                            "description": "Test style"
-                        },
-                    },
-                    "required": ["gap"],
-                },
-            ),
-            Tool(
-                name="refactor_suggest",
-                description="Suggest refactoring based on code and usage patterns",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "symbols": {
-                            "type": "array",
-                            "items": {"type": "object"},
-                            "description": "Code symbols to analyze"
-                        },
-                        "patterns": {
-                            "type": "array",
-                            "items": {"type": "object"},
-                            "description": "Usage patterns (optional)"
-                        },
-                        "analysis_type": {
-                            "type": "string",
-                            "enum": ["complexity", "duplication", "naming", "all"],
-                            "default": "all",
-                            "description": "Type of analysis"
-                        },
-                    },
-                    "required": ["symbols"],
-                },
-            ),
-            Tool(
-                name="ux_insights",
-                description="Extract UX insights from user behavior patterns",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "patterns": {
-                            "type": "array",
-                            "items": {"type": "object"},
-                            "description": "Behavior patterns to analyze"
-                        },
-                        "flow_type": {
-                            "type": "string",
-                            "default": "general",
-                            "description": "Type of flow (search, checkout, onboarding)"
-                        },
-                        "metric": {
-                            "type": "string",
-                            "enum": ["dropoff", "error_rate", "all"],
-                            "default": "all",
-                            "description": "Metric to analyze"
-                        },
-                    },
-                    "required": ["patterns"],
-                },
-            ),
-            Tool(
-                name="brain_stats",
-                description="Get Dev Brain server statistics",
-                inputSchema={
-                    "type": "object",
-                    "properties": {},
-                },
-            ),
-            Tool(
-                name="smart_tests_generate",
-                description="Generate complete pytest test file for a Python source file using AST analysis. Creates tests with proper mocks, fixtures, and assertions.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "file_path": {
-                            "type": "string",
-                            "description": "Absolute path to the Python source file to generate tests for"
-                        },
-                    },
-                    "required": ["file_path"],
-                },
-            ),
-            Tool(
-                name="docs_generate",
-                description="Generate documentation suggestions for code symbols with missing or incomplete docstrings",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "symbols": {
-                            "type": "array",
-                            "items": {"type": "object"},
-                            "description": "Code symbols to analyze for documentation"
-                        },
-                        "doc_style": {
-                            "type": "string",
-                            "enum": ["google", "numpy", "sphinx"],
-                            "default": "google",
-                            "description": "Documentation style to use"
-                        },
-                    },
-                    "required": ["symbols"],
-                },
-            ),
-            Tool(
-                name="security_audit",
-                description="Analyze code for security vulnerabilities (SQL injection, command injection, hardcoded secrets, etc.)",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "symbols": {
-                            "type": "array",
-                            "items": {"type": "object"},
-                            "description": "Code symbols with source_code to analyze"
-                        },
-                        "severity_threshold": {
-                            "type": "string",
-                            "enum": ["low", "medium", "high", "critical"],
-                            "default": "low",
-                            "description": "Minimum severity level to report"
-                        },
-                    },
-                    "required": ["symbols"],
-                },
-            ),
-        ]
-
-    # =========================================================================
-    # Tool Implementations
-    # =========================================================================
-
-    @server.call_tool()
-    async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
-        """Handle tool calls."""
-
-        if name == "coverage_analyze":
-            return await handle_coverage_analyze(arguments)
-
-        elif name == "behavior_missing":
-            return await handle_behavior_missing(arguments)
-
-        elif name == "tests_generate":
-            return await handle_tests_generate(arguments)
-
-        elif name == "refactor_suggest":
-            return await handle_refactor_suggest(arguments)
-
-        elif name == "ux_insights":
-            return await handle_ux_insights(arguments)
-
-        elif name == "brain_stats":
-            return await handle_brain_stats(arguments)
-
-        elif name == "smart_tests_generate":
-            return await handle_smart_tests_generate(arguments)
-
-        elif name == "docs_generate":
-            return await handle_docs_generate(arguments)
-
-        elif name == "security_audit":
-            return await handle_security_audit(arguments)
-
-        else:
-            return [TextContent(type="text", text=f"Unknown tool: {name}")]
 
     async def handle_coverage_analyze(args: dict) -> list[TextContent]:
         """Handle coverage_analyze tool."""
@@ -413,7 +380,6 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
         style = args.get("style", config.test_style)
 
         # Convert gap data to CoverageGap
-        from .analyzer import CoverageGap
         import hashlib
 
         pattern = gap_data.get("pattern", [])
@@ -503,7 +469,7 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
                 "min_confidence": config.min_confidence,
                 "max_suggestions": config.max_suggestions,
                 "default_test_framework": config.default_test_framework,
-                "tools_available": 9,
+                "tools_available": len(TOOL_DEFINITIONS),
             })
         )]
 
@@ -649,6 +615,39 @@ def create_server(config: Optional[DevBrainConfig] = None) -> Server:
                 "severity_threshold": severity_threshold,
             })
         )]
+
+    # =========================================================================
+    # Tool Registry — single source of truth for name → handler dispatch
+    # =========================================================================
+
+    _tool_handlers: dict[str, Any] = {
+        "coverage_analyze": handle_coverage_analyze,
+        "behavior_missing": handle_behavior_missing,
+        "tests_generate": handle_tests_generate,
+        "refactor_suggest": handle_refactor_suggest,
+        "ux_insights": handle_ux_insights,
+        "brain_stats": handle_brain_stats,
+        "smart_tests_generate": handle_smart_tests_generate,
+        "docs_generate": handle_docs_generate,
+        "security_audit": handle_security_audit,
+    }
+
+    # =========================================================================
+    # MCP Protocol Hooks
+    # =========================================================================
+
+    @server.list_tools()
+    async def list_tools() -> list[Tool]:
+        """List available tools from the registry."""
+        return list(TOOL_DEFINITIONS)
+
+    @server.call_tool()
+    async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
+        """Dispatch tool calls via the handler registry."""
+        handler = _tool_handlers.get(name)
+        if handler is None:
+            return [TextContent(type="text", text=f"Unknown tool: {name}")]
+        return await handler(arguments)
 
     # =========================================================================
     # Resources

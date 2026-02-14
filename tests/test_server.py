@@ -17,7 +17,7 @@ from mcp.types import (
 )
 
 from brain_dev.config import DevBrainConfig
-from brain_dev.server import create_server
+from brain_dev.server import create_server, TOOL_DEFINITIONS
 
 
 # =============================================================================
@@ -116,6 +116,23 @@ class TestListTools:
             "security_audit",
         }
         assert tool_names == expected
+
+    @pytest.mark.asyncio
+    async def test_tool_registry_matches_listed_tools(self, server):
+        """Regression: TOOL_DEFINITIONS registry must match listed tools exactly."""
+        tools = await list_tools(server)
+
+        registry_names = {t.name for t in TOOL_DEFINITIONS}
+        listed_names = {t.name for t in tools}
+        assert registry_names == listed_names
+        assert len(TOOL_DEFINITIONS) == len(tools)
+
+    @pytest.mark.asyncio
+    async def test_brain_stats_reports_correct_tool_count(self, server):
+        """Regression: brain_stats must reflect actual tool count, not hardcoded."""
+        result = await call_tool(server, "brain_stats", {})
+        data = json.loads(result[0].text)
+        assert data["tools_available"] == len(TOOL_DEFINITIONS)
 
     @pytest.mark.asyncio
     async def test_tools_have_descriptions(self, server):
