@@ -20,6 +20,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
+# Precompiled regex patterns (avoid recompilation in per-function loops)
+_RE_RAISES = re.compile(r'(?:raises?|Raises?)[:\s]+(\w+)')
+_RE_OPTIONAL_RETURN = re.compile(r"Optional\[(.+)\]$")
+
 
 @dataclass
 class Parameter:
@@ -377,8 +381,7 @@ class CodeAnalyzer(ast.NodeVisitor):
 
         # Check docstring for :raises: or Raises: sections
         docstring = ast.get_docstring(node) or ""
-        raises_pattern = r'(?:raises?|Raises?)[:\s]+(\w+)'
-        raises.extend(re.findall(raises_pattern, docstring))
+        raises.extend(_RE_RAISES.findall(docstring))
 
         # Check body for raise statements
         for child in ast.walk(node):
@@ -952,7 +955,7 @@ def {test_name}():
         Returns the inner type string, or None if not parseable.
         """
         # Match Optional[T] where T is the inner type
-        m = re.match(r"Optional\[(.+)\]$", ret)
+        m = _RE_OPTIONAL_RETURN.match(ret)
         if m:
             return m.group(1).strip()
         return None

@@ -251,6 +251,15 @@ class TestSecurityAnalyzer:
     def analyzer(self):
         return SecurityAnalyzer()
 
+    def test_security_patterns_are_precompiled(self):
+        """Regression: SECURITY_PATTERNS must contain compiled re.Pattern objects."""
+        import re as _re
+        for category, cfg in SecurityAnalyzer.SECURITY_PATTERNS.items():
+            for pat in cfg["patterns"]:
+                assert isinstance(pat, _re.Pattern), (
+                    f"Pattern in {category!r} is not precompiled: {pat!r}"
+                )
+
     def test_detect_sql_injection(self, analyzer):
         """Test SQL injection detection."""
         symbols = [

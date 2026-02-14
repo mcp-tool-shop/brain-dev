@@ -11,6 +11,10 @@ from typing import Any, Optional
 import hashlib
 import re
 
+# Precompiled regex patterns used in hot loops
+_RE_WORD_SPLIT = re.compile(r"[_\s]")
+_RE_TRAILING_DIGITS = re.compile(r"\d+$")
+
 
 @dataclass
 class CoverageGap:
@@ -283,7 +287,7 @@ class BehaviorAnalyzer:
             # Look for handler patterns
             if "handle" in name or "on_" in name or "process" in name:
                 # Extract event type from name
-                parts = re.split(r"[_\s]", name)
+                parts = _RE_WORD_SPLIT.split(name)
                 for part in parts:
                     if part not in ("handle", "on", "process", "event"):
                         events.add(part)
@@ -488,7 +492,7 @@ class RefactorAnalyzer:
         # Simple approach: look for functions with similar names
         name_groups: dict[str, list] = {}
         for symbol in symbols:
-            base_name = re.sub(r'\d+$', '', symbol.get("name", ""))
+            base_name = _RE_TRAILING_DIGITS.sub("", symbol.get("name", ""))
             if base_name not in name_groups:
                 name_groups[base_name] = []
             name_groups[base_name].append(symbol)
@@ -805,114 +809,120 @@ Attributes:
         return issues
 
 
+def _compile_patterns(raw: list[str]) -> list[re.Pattern[str]]:
+    """Compile a list of regex strings once at import time."""
+    return [re.compile(p, re.IGNORECASE) for p in raw]
+
+
 class SecurityAnalyzer:
     """Analyzes code for security vulnerabilities."""
 
-    # Patterns that may indicate security issues
-    SECURITY_PATTERNS = {
+    # Precompiled security patterns — compiled once at class-definition time
+    # to avoid re-compilation inside hot loops.
+    SECURITY_PATTERNS: dict[str, dict[str, Any]] = {
         "sql_injection": {
-            "patterns": [
+            "patterns": _compile_patterns([
                 r'execute\s*\(\s*["\'].*["\']\s*%\s',  # %-formatting on string passed to execute
                 r'execute\s*\(\s*f["\']',     # f-string in SQL
                 r'cursor\.execute\s*\(\s*[^,]+\+',  # String concat in SQL
-            ],
+            ]),
             "severity": "critical",
             "cwe": "CWE-89",
             "recommendation": "Use parameterized queries instead of string formatting",
         },
         "command_injection": {
-            "patterns": [
+            "patterns": _compile_patterns([
                 r'os\.system\s*\(',
                 r'subprocess\.call\s*\(\s*[^,\[\]]+\+',
                 r'subprocess\.run\s*\(\s*shell\s*=\s*True',
                 r'eval\s*\(',
                 r'exec\s*\(',
-            ],
+            ]),
             "severity": "critical",
             "cwe": "CWE-78",
             "recommendation": "Avoid shell=True and validate/sanitize all inputs",
         },
         "hardcoded_secrets": {
-            "patterns": [
+            "patterns": _compile_patterns([
                 r'password\s*=\s*["\'][^"\']+["\']',
                 r'api_key\s*=\s*["\'][^"\']+["\']',
                 r'secret\s*=\s*["\'][^"\']+["\']',
                 r'token\s*=\s*["\'][A-Za-z0-9]{20,}["\']',
-            ],
+            ]),
             "severity": "high",
             "cwe": "CWE-798",
             "recommendation": "Use environment variables or secure vault for secrets",
         },
         "insecure_crypto": {
-            "patterns": [
+            "patterns": _compile_patterns([
                 r'md5\s*\(',
                 r'sha1\s*\(',
                 r'DES\.',
                 r'random\.random\s*\(',  # For crypto purposes
-            ],
+            ]),
             "severity": "medium",
             "cwe": "CWE-327",
             "recommendation": "Use modern cryptographic algorithms (SHA-256+, AES)",
         },
         "path_traversal": {
-            "patterns": [
+            "patterns": _compile_patterns([
                 r'open\s*\(\s*[^,]+\+',  # String concat in file path
                 r'Path\s*\(\s*[^,]+\+',
-            ],
+            ]),
             "severity": "high",
             "cwe": "CWE-22",
             "recommendation": "Validate and sanitize file paths, use Path.resolve()",
         },
         "insecure_deserialization": {
-            "patterns": [
+            "patterns": _compile_patterns([
                 r'pickle\.loads?\s*\(',
                 r'yaml\.load\s*\([^,]+\)',  # Without Loader
                 r'marshal\.loads?\s*\(',
-            ],
+            ]),
             "severity": "critical",
             "cwe": "CWE-502",
             "recommendation": "Avoid deserializing untrusted data, use yaml.safe_load()",
         },
         "xss": {
-            "patterns": [
+            "patterns": _compile_patterns([
                 r'\.innerHTML\s*=',  # Direct innerHTML assignment
                 r'document\.write\s*\(',  # document.write with dynamic content
                 r'\.html\s*\([^)]*\+',  # jQuery .html() with string concat
                 r'dangerouslySetInnerHTML',  # React unsafe HTML
                 r'render_template_string\s*\(',  # Flask unsafe template
                 r'Markup\s*\([^)]*\+',  # Flask Markup with concat
-            ],
+            ]),
             "severity": "high",
             "cwe": "CWE-79",
             "recommendation": "Use proper escaping, avoid innerHTML, use textContent instead",
         },
         "ssrf": {
-            "patterns": [
+            "patterns": _compile_patterns([
                 r'requests\.(get|post|put|delete|patch)\s*\([^)]*\+',  # URL concat
                 r'urllib\.request\.urlopen\s*\([^)]*\+',
                 r'httpx\.(get|post|put|delete|patch)\s*\([^)]*\+',
                 r'aiohttp\.ClientSession\(\)\.get\s*\([^)]*\+',
-            ],
+            ]),
             "severity": "high",
             "cwe": "CWE-918",
             "recommendation": "Validate and allowlist URLs, don't allow user-controlled URLs",
         },
         "xxe": {
-            "patterns": [
+            "patterns": _compile_patterns([
                 r'etree\.parse\s*\(',  # XML parsing without safe parser
                 r'xml\.dom\.minidom\.parse\s*\(',
                 r'xml\.sax\.parse\s*\(',
                 r'ElementTree\.parse\s*\(',
-            ],
+            ]),
             "severity": "high",
             "cwe": "CWE-611",
             "recommendation": "Disable external entity processing, use defusedxml",
         },
         "log_injection": {
-            "patterns": [
+            "patterns": _compile_patterns([
                 r'logging\.(info|debug|warning|error|critical)\s*\([^)]*\+',
                 r'logger\.(info|debug|warning|error|critical)\s*\(f["\']',
-            ],
+            ]),
             "severity": "medium",
             "cwe": "CWE-117",
             "recommendation": "Use structured logging, sanitize log inputs",
@@ -1107,8 +1117,8 @@ class SecurityAnalyzer:
                 if severity_order.get(config["severity"], 0) < threshold:
                     continue
 
-                for pattern in config["patterns"]:
-                    matches = re.finditer(pattern, source, re.IGNORECASE)
+                for compiled_pat in config["patterns"]:
+                    matches = compiled_pat.finditer(source)
                     for match in matches:
                         issue_id = hashlib.md5(
                             f"{file_path}:{line}:{category}".encode()
