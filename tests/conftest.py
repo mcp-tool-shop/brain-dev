@@ -3,6 +3,16 @@ Pytest configuration and fixtures for Dev Brain tests.
 """
 
 import pytest
+
+
+def pytest_addoption(parser):
+    """Register --update-golden CLI flag for snapshot tests."""
+    parser.addoption(
+        "--update-golden",
+        action="store_true",
+        default=False,
+        help="Regenerate golden expected files from current analyzer output.",
+    )
 from brain_dev.config import DevBrainConfig
 from brain_dev.server import create_server
 from brain_dev.analyzer import (

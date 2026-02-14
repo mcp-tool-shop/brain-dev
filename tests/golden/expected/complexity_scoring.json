@@ -1,0 +1,22 @@
+[
+  {
+    "code_after": "",
+    "code_before": "",
+    "confidence": 0.9,
+    "location": "sample.py:20",
+    "reason": "Function has 9 control flow branches (AST-based)",
+    "signal_strength": 0.9,
+    "suggestion_id": "complex_<hash>",
+    "type": "reduce_complexity"
+  },
+  {
+    "code_after": "",
+    "code_before": "",
+    "confidence": 0.95,
+    "location": "sample.py:40",
+    "reason": "Function has 11 control flow branches (AST-based)",
+    "signal_strength": 0.95,
+    "suggestion_id": "complex_<hash>",
+    "type": "reduce_complexity"
+  }
+]

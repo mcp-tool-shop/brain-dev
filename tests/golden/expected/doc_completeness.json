@@ -1,0 +1,52 @@
+[
+  {
+    "confidence": 0.9,
+    "doc_type": "missing",
+    "location": "sample.py:27",
+    "signal_strength": 0.9,
+    "suggested_doc": "\"\"\"Brief description of UndocumentedClass.\n\nAttributes:\n    attr1: Description of attr1.\n\"\"\"",
+    "suggestion_id": "doc_<hash>",
+    "symbol_name": "UndocumentedClass",
+    "symbol_type": "class"
+  },
+  {
+    "confidence": 0.9,
+    "doc_type": "missing",
+    "location": "sample.py:28",
+    "signal_strength": 0.9,
+    "suggested_doc": "\"\"\"Brief description of __init__.\n\nArgs:\n    param1: Description of param1.\n\nReturns:\n    Description of return value.\n\nRaises:\n    ExceptionType: When this exception is raised.\n\"\"\"",
+    "suggestion_id": "doc_<hash>",
+    "symbol_name": "__init__",
+    "symbol_type": "function"
+  },
+  {
+    "confidence": 0.9,
+    "doc_type": "missing",
+    "location": "sample.py:31",
+    "signal_strength": 0.9,
+    "suggested_doc": "\"\"\"Brief description of transform.\n\nArgs:\n    param1: Description of param1.\n\nReturns:\n    Description of return value.\n\nRaises:\n    ExceptionType: When this exception is raised.\n\"\"\"",
+    "suggestion_id": "doc_<hash>",
+    "symbol_name": "transform",
+    "symbol_type": "function"
+  },
+  {
+    "confidence": 0.9,
+    "doc_type": "missing",
+    "location": "sample.py:5",
+    "signal_strength": 0.9,
+    "suggested_doc": "\"\"\"Brief description of no_docs.\n\nArgs:\n    param1: Description of param1.\n\nReturns:\n    Description of return value.\n\nRaises:\n    ExceptionType: When this exception is raised.\n\"\"\"",
+    "suggestion_id": "doc_<hash>",
+    "symbol_name": "no_docs",
+    "symbol_type": "function"
+  },
+  {
+    "confidence": 0.7,
+    "doc_type": "incomplete",
+    "location": "sample.py:9",
+    "signal_strength": 0.7,
+    "suggested_doc": "Missing: Args/Parameters section, Returns section, detailed description",
+    "suggestion_id": "doc_<hash>",
+    "symbol_name": "short_doc",
+    "symbol_type": "function"
+  }
+]

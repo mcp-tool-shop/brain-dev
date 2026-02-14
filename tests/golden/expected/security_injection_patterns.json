@@ -1,0 +1,35 @@
+[
+  {
+    "category": "command_injection",
+    "confidence": 0.85,
+    "cwe_id": "CWE-78",
+    "description": "Potential command injection: os.system() called with f-string with interpolated variables",
+    "issue_id": "sec_<hash>",
+    "location": "sample.py:14",
+    "recommendation": "Avoid os.system(); use subprocess with a list of args",
+    "severity": "critical",
+    "signal_strength": 0.85
+  },
+  {
+    "category": "hardcoded_secrets",
+    "confidence": 0.7,
+    "cwe_id": "CWE-798",
+    "description": "Potential hardcoded secrets vulnerability detected",
+    "issue_id": "sec_<hash>",
+    "location": "sample.py:19",
+    "recommendation": "Use environment variables or secure vault for secrets",
+    "severity": "high",
+    "signal_strength": 0.7
+  },
+  {
+    "category": "sql_injection",
+    "confidence": 0.85,
+    "cwe_id": "CWE-89",
+    "description": "Potential sql injection: cursor.execute() called with f-string with interpolated variables",
+    "issue_id": "sec_<hash>",
+    "location": "sample.py:9",
+    "recommendation": "Use parameterized queries instead of string formatting",
+    "severity": "critical",
+    "signal_strength": 0.85
+  }
+]
