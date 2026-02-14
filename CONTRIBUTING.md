@@ -2,165 +2,101 @@
 
 Dev Brain is an MCP server that provides AI-powered code analysis tools. Contributions are welcome!
 
-## Development Setup
+## Local Development
 
 ```bash
-git clone https://github.com/mcp-tool-shop/dev-brain.git
-cd dev-brain
+git clone https://github.com/mcp-tool-shop-org/brain-dev.git
+cd brain-dev
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 pytest
+brain-dev            # run the MCP server
 ```
+
+Requires **Python 3.11+** (CI tests 3.11, 3.12, 3.13, 3.14).
 
 ## How to Contribute
 
 ### Reporting Issues
 
-If you find a bug or have a feature request:
-
-1. Check existing [issues](https://github.com/mcp-tool-shop/dev-brain/issues)
-2. If not found, create a new issue with:
-   - Clear description of the problem or feature
-   - Steps to reproduce (for bugs)
-   - Expected vs. actual behavior
-   - Your environment (Python version, OS, MCP client)
+1. Check existing [issues](https://github.com/mcp-tool-shop-org/brain-dev/issues)
+2. If not found, create a new issue using the provided bug report or feature request template
 
 ### Contributing Code
 
 1. **Fork the repository** and create a branch from `main`
-2. **Make your changes**
-   - Follow existing code style
-   - Use type hints
-   - Add tests for new functionality
+2. **Make your changes** — follow existing code style, use type hints, add tests
 3. **Test your changes**
    ```bash
-   pytest
-   pytest --cov=dev_brain
+   pytest                                                       # run all tests
+   pytest tests/ -v --cov=brain_dev --cov-report=term-missing   # with coverage
    ```
-4. **Commit your changes**
-   - Use clear, descriptive commit messages
-   - Reference issue numbers when applicable
-5. **Submit a pull request**
-   - Describe what your PR does and why
-   - Link to related issues
+4. **Commit** with clear, descriptive messages; reference issue numbers when applicable
+5. **Submit a pull request** using the PR template
 
 ## Project Structure
 
 ```
-dev-brain/
-├── dev_brain/
-│   ├── server.py          # Main MCP server
-│   ├── tools/             # Analysis tool implementations
-│   │   ├── test_gen.py    # Test generation
-│   │   ├── security.py    # Security scanning
-│   │   ├── coverage.py    # Coverage analysis
-│   │   └── refactor.py    # Refactoring suggestions
-│   └── utils/             # Shared utilities
-├── tests/                 # Test suite
-└── spec.md               # Tool specifications
+brain-dev/
+├── brain_dev/
+│   ├── __init__.py
+│   ├── server.py               # MCP server, TOOL_DEFINITIONS registry, handlers
+│   ├── analyzer.py             # All analyzer classes + dataclasses
+│   ├── smart_test_generator.py # AST-based pytest file generator
+│   └── config.py               # DevBrainConfig dataclass
+├── tests/
+│   ├── conftest.py             # Shared fixtures
+│   ├── test_server.py          # Server + handler tests
+│   ├── test_analyzer.py        # Core analyzer tests
+│   ├── test_new_analyzers.py   # Docs + Security analyzer tests
+│   ├── test_smart_generator.py # Smart test generator tests
+│   ├── test_integration.py     # End-to-end workflow tests
+│   └── test_coverage_gaps.py   # Edge-case coverage tests
+├── pyproject.toml              # Build config, deps, entry point
+└── CHANGELOG.md
 ```
 
 ## Adding New Analysis Tools
 
-When adding a new MCP tool:
+The tool registry lives in `brain_dev/server.py`:
 
-1. **Define the tool** in `dev_brain/server.py`:
-   ```python
-   @server.call_tool()
-   async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent]:
-       if name == "your_tool_name":
-           return await your_tool_implementation(arguments)
-   ```
+1. Add a `Tool(...)` entry to the `TOOL_DEFINITIONS` list
+2. Write a `def handle_<tool_name>(args: dict) -> list[TextContent]` handler inside `create_server()`
+3. Map the name to the handler in the `_HANDLERS` dict
+4. Add tests in `tests/`
+5. Update `CHANGELOG.md`
 
-2. **Implement the analysis** in `dev_brain/tools/`:
-   - Use AST parsing for code analysis
-   - Return structured JSON results
-   - Handle errors gracefully
+## MCP Tools (source of truth: `TOOL_DEFINITIONS` in server.py)
 
-3. **Add tests** in `tests/`:
-   - Test with real code samples
-   - Test error cases
-   - Test edge cases
-
-4. **Document the tool** in `spec.md` and `README.md`
-
-## Testing
-
-- Write tests for new functionality
-- Maintain 90%+ coverage
-- Use fixtures for common test data
-- Test both success and error paths
-
-Run tests:
-```bash
-pytest                    # Run all tests
-pytest -v                 # Verbose output
-pytest --cov=dev_brain    # With coverage
-pytest -k test_security   # Run specific tests
-```
+| Tool | Description |
+|------|-------------|
+| `coverage_analyze` | Test coverage gap detection |
+| `behavior_missing` | Find unhandled user behaviours |
+| `tests_generate` | Test suggestions from coverage gaps |
+| `smart_tests_generate` | AST-powered pytest file generation |
+| `refactor_suggest` | Complexity, duplication, naming analysis |
+| `ux_insights` | Dropoff and error-pattern detection |
+| `docs_generate` | Documentation gap finder |
+| `security_audit` | OWASP vulnerability scanning with CWE mapping |
+| `brain_stats` | Server statistics and health |
 
 ## Code Quality
 
-### Type Hints
-Use type hints for all functions:
-```python
-async def analyze_code(path: str) -> dict[str, Any]:
-    ...
-```
-
-### AST Analysis
-When working with Python AST:
-- Use `ast.parse()` for code parsing
-- Use `ast.walk()` for tree traversal
-- Handle syntax errors gracefully
-
-### MCP Protocol
-Follow MCP conventions:
-- Tools return `list[types.TextContent]`
-- Use structured JSON for results
-- Include error details in responses
-
-## Documentation
-
-When adding features:
-
-- Update `README.md` with usage examples
-- Add tool specifications to `spec.md`
-- Include inline comments for complex logic
-- Update `CHANGELOG.md`
-
-## Security Considerations
-
-When modifying security scanning:
-
-- Test against known vulnerability patterns
-- Avoid false positives
-- Document detection methods
-- Add test cases for new patterns
-
-## Tool Categories
-
-Dev Brain provides 9 tool categories:
-
-1. **Test Generation** - Generate pytest files from AST
-2. **Security Scanning** - Detect vulnerabilities (SQL injection, secrets, etc.)
-3. **Coverage Analysis** - Find untested code paths
-4. **Refactoring Suggestions** - Identify complexity and duplication
-5. **Documentation Analysis** - Find missing docstrings
-6. **UX Insights** - Analyze user-facing code
-7. **Performance Profiling** - Identify bottlenecks
-8. **Dependency Analysis** - Check for outdated/vulnerable packages
-9. **Architecture Analysis** - Assess code structure
+- **Type hints** on all functions
+- **AST analysis**: use `ast.parse()` / `ast.walk()`; handle `SyntaxError` gracefully (return empty / fallback)
+- **MCP convention**: handlers return `list[TextContent]` with JSON; never crash on bad input
 
 ## Release Process
 
 (For maintainers)
 
-1. Update version in `pyproject.toml`
-2. Update `CHANGELOG.md`
-3. Create git tag: `git tag v1.x.x`
-4. Push tag: `git push origin v1.x.x`
-5. GitHub Actions will publish to PyPI
+1. Bump `version` in `pyproject.toml`
+2. Add a new section to `CHANGELOG.md` under `## [x.y.z] - YYYY-MM-DD`
+3. Commit: `git commit -m "release: vX.Y.Z"`
+4. Tag: `git tag vX.Y.Z`
+5. Push: `git push origin main --tags`
+6. Create a GitHub Release from the tag — the publish workflow uploads to PyPI automatically
 
 ## Questions?
 
-Open an issue or start a discussion in the [MCP Tool Shop](https://github.com/mcp-tool-shop) organization.
+Open an issue or start a discussion in the [mcp-tool-shop-org](https://github.com/mcp-tool-shop-org) organization.

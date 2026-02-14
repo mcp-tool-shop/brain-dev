@@ -1,8 +1,8 @@
 # 🧠 Dev Brain — AI-Powered Code Intelligence via MCP
 
 [![PyPI version](https://badge.fury.io/py/brain-dev.svg)](https://pypi.org/project/brain-dev/)
-[![Tests](https://github.com/mcp-tool-shop/brain-dev/actions/workflows/test.yml/badge.svg)](https://github.com/mcp-tool-shop/brain-dev/actions/workflows/test.yml)
-[![codecov](https://codecov.io/gh/mcp-tool-shop/brain-dev/branch/master/graph/badge.svg)](https://codecov.io/gh/mcp-tool-shop/brain-dev)
+[![Tests](https://github.com/mcp-tool-shop-org/brain-dev/actions/workflows/test.yml/badge.svg)](https://github.com/mcp-tool-shop-org/brain-dev/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/mcp-tool-shop-org/brain-dev/branch/main/graph/badge.svg)](https://codecov.io/gh/mcp-tool-shop-org/brain-dev)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-purple.svg)](https://modelcontextprotocol.io/)
@@ -191,27 +191,14 @@ Recommendations:
 ## 🔧 Development
 
 ```bash
-# Clone the repository
-<<<<<<< HEAD
-git clone https://github.com/mcp-tool-shop/dev-brain.git
-cd dev-brain
-=======
-git clone https://github.com/mcp-tool-shop/brain-dev.git
+git clone https://github.com/mcp-tool-shop-org/brain-dev.git
 cd brain-dev
->>>>>>> 550fd0d (Rename dev-brain to brain-dev)
-
-# Install in development mode
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
-
-# Run tests
 pytest tests/ -v
-
-# Run with coverage
-pytest tests/ --cov=brain_dev --cov-report=html
-
-# Type checking
-mypy brain_dev
 ```
+
+Python 3.11, 3.12, 3.13, and 3.14 are supported. See [CONTRIBUTING.md](CONTRIBUTING.md) for full details.
 
 ---
 
@@ -225,15 +212,7 @@ mypy brain_dev
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here's how:
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-See [SECURITY.md](SECURITY.md) for security policy and vulnerability reporting.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions and guidelines, and [SECURITY.md](SECURITY.md) for vulnerability reporting.
 
 ---
 

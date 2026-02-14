@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **`confidence` field renamed to `signal_strength`** on RefactorSuggestion,
+  UXInsight, DocSuggestion, and SecurityIssue.  The old `confidence` key is
+  still emitted in `to_dict()` output and accessible via a `@property` alias
+  for backward compatibility.
+- `DevBrainConfig.min_confidence` renamed to `min_signal_strength`
+  (property alias preserved).
+- Complexity scoring now uses real AST-based analysis instead of
+  string counting.
+- SecurityAnalyzer runs AST-first injection detection before regex
+  fallback.
+- Regex patterns are precompiled at class-definition time.
+- Stdlib whitelist expanded to 100+ modules with `importlib.util.find_spec`
+  fallback.
+
+### Fixed
+- CI coverage workflow failure caused by orphaned submodule entries.
+- Windows temp-path handling in smart test generator (uses `tempfile.gettempdir()`).
+- False positive on parameterized SQL queries in security scanner.
+- False positive on installed packages detected as stdlib.
+
+### Added
+- CODEOWNERS, issue templates, PR template.
+- Dependabot config (pip + github-actions, weekly).
+- `workflow_dispatch` on CI workflows for manual runs.
+- Path filters on CI to skip docs-only changes.
+
 ## [1.0.0] - 2026-01-24
 
 ### Added
@@ -19,35 +46,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `smart_tests_generate` - AST-based pytest generation
   - `docs_generate` - Documentation templates
   - `security_audit` - OWASP vulnerability scanning
-  - `code_health_score` - Overall quality scoring
-- **Security Detection** - 49 patterns across 6+ vulnerability types
+  - `brain_stats` - Server statistics and health
+- **Security Detection** across 9 vulnerability categories
   - SQL Injection (CWE-89)
   - Command Injection (CWE-78)
   - XSS (CWE-79)
   - Hardcoded Secrets (CWE-798)
   - Path Traversal (CWE-22)
   - SSRF (CWE-918)
-- **Multi-Language Support**
-  - Python (full AST analysis)
-  - JavaScript/TypeScript
-  - PowerShell
-  - CSS/HTML
-- **Code Health Scoring** - 11 category breakdown
+  - XXE (CWE-611)
+  - Log Injection (CWE-117)
+  - Insecure Deserialization (CWE-502)
 - **MCP Integration** - Works with Claude, Cursor, Windsurf
-- **FastMCP Framework** - Built on modern Python MCP SDK
-
-### Infrastructure
 - GitHub Actions CI/CD
-- 90% test coverage
 - MIT License
 
----
-
-## Version History
-
-| Version | Date | Highlights |
-|---------|------|------------|
-| 1.0.0 | 2026-01-24 | Initial release |
-
-[Unreleased]: https://github.com/mcp-tool-shop/dev-brain/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/mcp-tool-shop/dev-brain/releases/tag/v1.0.0
+[Unreleased]: https://github.com/mcp-tool-shop-org/brain-dev/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/mcp-tool-shop-org/brain-dev/releases/tag/v1.0.0
