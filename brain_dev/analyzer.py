@@ -758,8 +758,7 @@ Attributes:
         if symbol_type == "function":
             # Check for Args section if function likely has parameters
             if "args:" not in doc_lower and "parameters:" not in doc_lower:
-                # This is a heuristic - would need AST to be accurate
-                pass
+                issues.append("Args/Parameters section")
             if "returns:" not in doc_lower and "return" not in doc_lower:
                 issues.append("Returns section")
 

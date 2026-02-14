@@ -139,7 +139,7 @@ class TestDocsAnalyzer:
             {
                 "name": "well_documented",
                 "symbol_type": "function",
-                "docstring": "This is a well-documented function that does something important.\n\nReturns:\n    The result of the operation.",
+                "docstring": "This is a well-documented function that does something important.\n\nArgs:\n    value: The input value.\n\nReturns:\n    The result of the operation.",
                 "file_path": "good.py",
                 "line": 1,
             }
@@ -204,6 +204,44 @@ class TestDocsAnalyzer:
         """Test completeness fails for short docs."""
         issues = analyzer._check_doc_completeness("Too short", "function")
         assert "detailed description" in issues
+
+    def test_check_doc_completeness_missing_args(self, analyzer):
+        """Regression: missing Args/Parameters section must be reported.
+
+        Previously the detection branch had a silent 'pass' instead of
+        appending to the issues list.
+        """
+        issues = analyzer._check_doc_completeness(
+            "This function processes data and returns the result.",
+            "function"
+        )
+        assert "Args/Parameters section" in issues
+
+    def test_check_doc_completeness_has_args(self, analyzer):
+        """Test that a docstring with Args section passes the check."""
+        issues = analyzer._check_doc_completeness(
+            "This function processes data and returns the result.\n\nArgs:\n    x: the input value\n\nReturns:\n    The processed result.",
+            "function"
+        )
+        assert "Args/Parameters section" not in issues
+        assert "Returns section" not in issues
+
+    def test_analyze_docs_reports_incomplete_args(self, analyzer):
+        """Regression: analyze_docs must flag functions with docstrings
+        missing an Args section as incomplete."""
+        symbols = [
+            {
+                "name": "process_data",
+                "symbol_type": "function",
+                "docstring": "This function processes data and returns the result.",
+                "file_path": "test.py",
+                "line": 10,
+            }
+        ]
+        suggestions = analyzer.analyze_docs(symbols)
+        assert len(suggestions) == 1
+        assert suggestions[0].doc_type == "incomplete"
+        assert "Args/Parameters section" in suggestions[0].suggested_doc
 
 
 class TestSecurityAnalyzer:
